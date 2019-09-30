@@ -1,0 +1,7 @@
+1.) Estimated time to complete: 2 hours
+2.) Actual time complete:
+	Design: 20 min
+	programming: 1.5 hours
+	Debugging: 20 min
+	Total: 140 min = 2 hour 20 min
+3.) Accuracy:86%

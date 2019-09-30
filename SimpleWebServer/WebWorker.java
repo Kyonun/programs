@@ -197,7 +197,7 @@ import java.util.TimeZone;
                       		  os.write(date.getBytes());
                    	    } // end if
                    	    if (contents.contains("<cs371server>")){
-                        os.write("Ayeeeee my server works! brb playing WoW classic.\n".getBytes());
+                        os.write("Aren't they cute??\n".getBytes());
                             }// end if
 			} // end while
  		     }//end try 
