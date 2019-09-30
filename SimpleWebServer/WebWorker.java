@@ -53,6 +53,8 @@ import java.util.TimeZone;
     {
 	// Make a String called webAdd to hold the web address
         String webAdd = "";
+	// Make a string that holds the type of content
+	String cntnt = "";
         
         System.err.println("Handling connection...");
         try {
@@ -62,11 +64,20 @@ import java.util.TimeZone;
 	    // Set the web address to the outcome of the readHTTP method. This
 	    // should give us the URL.
             webAdd = readHTTPRequest(is);
+	    System.err.println("HTTP Request: " + webAdd);
+
+	    // Check for the file type and then set cntnt to the respective type
+	    if(webAdd.contains(".jpg")) cntnt = "image/jpeg";
+	    else if(webAdd.contains(".png")) cntnt = "image/png";
+	    else if(webAdd.contains(".gif")) cntnt = "image/gif";
+	    else if(webAdd.contains(".ico")) cntnt = "image/x-icon";
+	    // if we can't find an image, set the default to be a txt file.
+	    else cntnt = "text/html";
             
             // Because we added a third variable, we want to send the URL to the writeHTTP
 	    // and writeContent methods.
-            writeHTTPHeader(os, "text/html", webAdd);  
-            writeContent(os, "text/html", webAdd);
+            writeHTTPHeader(os, cntnt, webAdd);  
+            writeContent(os, cntnt, webAdd);
             os.flush();
             socket.close();
         } catch (Exception e) {
@@ -80,7 +91,7 @@ import java.util.TimeZone;
     * Read the HTTP request header.
     **/
 
-    // I wante to return the URL String, so I changed it to String instead of void.
+    // I want to return the URL String so I changed it to String instead of void.
     private String readHTTPRequest(InputStream is)
     {
         String line;
@@ -157,42 +168,60 @@ import java.util.TimeZone;
     * be done after the HTTP header has been written out.
     * @param os is the OutputStream object to write to
     **/
-    private void writeContent(OutputStream os, String contentType, String webAdd) throws Exception
+     private void writeContent(OutputStream os, String contentType, String webAdd) throws Exception
     {
-	// Added date information since cs371date needs to print if found.
+    	//copy date declarations for tag replacement
         Date d = new Date();
         DateFormat df = DateFormat.getDateTimeInstance();
         df.setTimeZone(TimeZone.getTimeZone("GMT-6"));
 
-	// Create a string specifically for the file content and another webAdd copy starting with a period.
-	// Also creating a new file named inp again.
+	// Create a string specifically for the file content and another webAdd copy
+	//  starting with a period.
         String contents = "";
         String wac = "." + webAdd.substring(0, webAdd.length());
         String date = df.format(d);
         File inp = new File(wac);
 
-        // While the contrents in the file aren't NULL, write the contents of the file in contents string.
+
+	// While the contrents in the file aren't NULL, write the contents of the file in contents string.
 	// If the contents of the file contain "<cs371date>", write the date. If it contains "<cs371server>",
 	// write my identification string. If file not found, throw File Not Found exception.
-            try{
-                FileReader iRead = new FileReader(inp);
+        if (contentType.equals("text/html")) {
+	        try{
+	            FileReader iRead = new FileReader(inp);
                 BufferedReader iBuff = new BufferedReader(iRead);
              	   while((contents = iBuff.readLine()) != null) {
                	     os.write(contents.getBytes());
                	     os.write("\n".getBytes());
                 	    if (contents.contains("<cs371date>")) {
                       		  os.write(date.getBytes());
-                   	 } // end if
+                   	    } // end if
                    	    if (contents.contains("<cs371server>")){
                         os.write("Ayeeeee my server works! brb playing WoW classic.\n".getBytes());
-                }// end if
-	} // end while
-                
-            } catch(FileNotFoundException e) {
-                System.err.println("File not found: " + webAdd);
-                os.write("<h1>Error: 404 Not found<h1>\n".getBytes());
-            } // end try-catch
+                            }// end if
+			} // end while
+ 		     }//end try 
+	        //if file doesn't exist, throw 404
+	        catch(FileNotFoundException e) {
+	                System.err.println("File not found: " + webAdd);
+	                os.write("<h1>Error: 404 Not found<h1>\n".getBytes());
+		 }//end catch
+  	 }// end if
         
-    } // end method
-
-} // end class
+        // If not a text file, try image files.
+        else if (contentType.contains("image")) {
+        	try {
+        		FileInputStream iIn = new FileInputStream(inp);
+        		byte imgArr[] = new byte [(int) inp.length()];
+        		iIn.read(imgArr);
+        		DataOutputStream iOut = new DataOutputStream(os);
+        		iOut.write(imgArr);
+        	       }//end try
+        	//if file doesn't exist, throw 404
+	        catch(FileNotFoundException e) {
+	                System.err.println("File not found: " + webAdd);
+	                os.write("<h1>Error: 404 Not found<h1>\n".getBytes());
+	        }//end catch
+           }//end if
+      }//end writeContent
+  } // end class
