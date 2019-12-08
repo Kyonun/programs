@@ -1,0 +1,28 @@
+<project name="circles" default="compile" >
+
+   <property name="junitjar" location="/home/ugrad22/gagarcia/junit-4.13-rc-2.jar">
+
+   <target name="compile" description="compile the source">
+      <javac srcdir="." includeantruntime="false" debug="true" classpath="${junitjar}" />
+   </target>
+
+  <target name= "run" depends = "compile">
+        <echo message = " Running args:"/>
+        <java classname = "CircleRun" fork = "true">
+            <arg value = "1"/>
+            <arg value = "1"/>
+            <arg value = "1"/>
+            <arg value = "1"/>
+            <arg value = "1"/>
+            <arg value = "1"/>
+        </java>
+    </target>
+
+   <target name="clean">
+      <delete>
+         <fileset dir="." includes="*.class"/>
+      </delete>
+      <delete dir="report" />
+   </target>
+
+</project>
